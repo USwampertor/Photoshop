@@ -12,6 +12,23 @@ do
 
 squared = Math.pow(2, i - 1);
 
+Image.prototype.onDraw = function()
+{ 
+  // written by Marc Autret
+  // "this" is the container; "this.image" is the graphic
+  if( !this.image ) return;
+  var WH = this.size,
+  wh = this.image.size,
+  k = Math.min(WH[0]/wh[0], WH[1]/wh[1]), 
+  xy;
+  // Resize proportionally:
+  wh = [k*wh[0],k*wh[1]];
+  // Center:
+  xy = [ (WH[0]-wh[0])/2, (WH[1]-wh[1])/2 ];
+  this.graphics.drawImage(this.image,xy[0],xy[1],wh[0],wh[1]);
+  WH = wh = xy = null;
+}
+
 // DLG
 // ===
 var dlg = new Window("palette"); 
@@ -20,6 +37,10 @@ var dlg = new Window("palette");
     dlg.alignChildren = ["center","top"]; 
     dlg.spacing = 10; 
     dlg.margins = 16; 
+
+    var imageFile = new File(File.encode('C:/Users/toa_l/Pictures/ahit6.png'));
+    var lodImg = dlg.add("image", undefined, imageFile, {name: "lodImg"}); 
+        lodImg.size=[150,150];
 
 // COMPRESSPNL
 // ===========
@@ -58,7 +79,7 @@ var lodTitle = lodPnl.add("statictext", undefined, undefined, {name: "lodTitle"}
 
 var lodSldr = lodPnl.add("slider", undefined, undefined, undefined, undefined, {name: "lodSldr"}); 
     lodSldr.minvalue = 0; 
-    lodSldr.maxvalue = i + 1; 
+    lodSldr.maxvalue = i + 1;
     lodSldr.value = 0; 
     lodSldr.alignment = ["center","top"]; 
     // lodSldr.preferredSize.width = 300; 
