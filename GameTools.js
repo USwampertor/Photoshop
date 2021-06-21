@@ -80,13 +80,13 @@ var lodTitle = lodPnl.add("statictext", undefined, undefined, {name: "lodTitle"}
 var lodSldr = lodPnl.add("slider", undefined, undefined, undefined, undefined, {name: "lodSldr"}); 
     lodSldr.minvalue = 0; 
     lodSldr.maxvalue = i + 1;
-    lodSldr.value = 0; 
+    lodSldr.value = i + 1; 
     lodSldr.alignment = ["center","top"]; 
     // lodSldr.preferredSize.width = 300; 
 
 var lodTxt = lodPnl.add("statictext", undefined, undefined, {name: "lodTxt"}); 
     lodTxt.alignment = ["center","top"]; 
-    lodTxt.text = "0"; 
+    lodTxt.text = (i + 1).toString(); 
 
 var prvTitle = lodPnl.add("statictext", undefined, undefined, {name: "prvTitle"}); 
     prvTitle.alignment = ["center","top"]; 
@@ -126,12 +126,23 @@ compressBtn.onClick = function() {
   var originalWidth = doc.width;
   var originalHeight = doc.height;
 
+  var newHeight = originalHeight;
+  var newWidth = originalWidth;
+
+  if (lodSldr.value != i + 1)
+  {
+    newHeight = Math.pow(2, i);
+    newWidth = Math.pow(2, i);
+  }
+
+  doc.resizeImage(newWidth, newHeight);
+
   var name = app.activeDocument.artLayers[0].name;
-  var file = new File(doc.path + '/' + name + "_" + lodSldr.value.toString() + ".png");
+  var file = new File(doc.path + '/' + doc.name + "_" + lodSldr.value.toString() + ".png");
   var opts = new PNGSaveOptions();
   opts.quality = lodSldr.value;
-  alert(lodSldr.value);
   doc.saveAs(file, opts, true);
+
 }
 
 // TO KEEP THIS ALIVE

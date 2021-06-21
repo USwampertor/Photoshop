@@ -1,3 +1,46 @@
+
+// Window(type, name);
+// palette
+// dialog
+var window =  new Window("dialog", "My Title");
+
+var i = 0;
+
+// add(type, [options]);
+var btn = window.add("button", undefined, "Close", {name: "cancel"});
+
+var btn2 =window.add("button", undefined, "Alert");
+
+var sdr = window.add("slider", undefined, "Slider");
+sdr.min = 0;
+sdr.max = 100;
+sdr.value = 50;
+
+var input = window.add("edittext", undefined, "Edit Text");
+input.text = "editable";
+
+var title = window.add("statictext", undefined, "My Title");
+title.text = i.toString();
+
+var pnl = window.add("panel", undefined, "My Panel");
+
+var btn3 = pnl.add("button", undefined, "Reset Counter");
+
+
+
+btn3.onClick = function() {
+    i = 0;
+    title.text = i.toString();
+}
+
+btn2.onClick = function() {
+    alert("Alert");
+    ++i;
+    title.text = i.toString();
+}
+
+window.show();
+/*
 var pic1File;
 var pic2File;
 
@@ -29,3 +72,4 @@ pic2Btn.onClick = function() {
 }
 
 dlg.show();
+*/

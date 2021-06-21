@@ -1,37 +1,11 @@
-var pic1File;
-var pic2File;
+var doc  = app.activeDocument;
 
-var dlg = new Window( "dialog", "Game Development Tools" );
-btnPnl = dlg.add( "panel", undefined, "Map Compressor" );
-lodPnl = dlg.add("panel", undefined, "LOD");
-compBtn = btnPnl.add("button", undefined, "Compress");
-cancelBtn = btnPnl.add( "button", undefined, "Cancel", { name: "cancel" } );
+doc.resizeImage(doc.width / 16, doc.height / 16);
 
-lodSldr = lodPnl.add("slider");
-lodTxt = lodPnl.add("edittext", undefined, "9");
+var file = new File( doc.path + "/" + doc.name + ".png");
 
-lodSldr.minvalue = 0;
-lodSldr.maxvalue = 9;
-lodSldr.value = 9;
+var opts = new PNGSaveOptions();
 
+doc.saveAs(file, opts, true);
 
-lodSldr.onChanging = function() {
-  lodSldr.value = Math.round(this.value.toFixed(0));
-  lodTxt.text = this.value.toFixed(0);
-};
-
-compBtn.onClick = function() {
-  var doc = app.activeDocument;
-
-  var originalWidth = doc.width;
-  var originalHeight = doc.height;
-
-  var name = app.activeDocument.artLayers[0].name;
-  var file = new File(doc.path + '/' + name + "_" + lodSldr.value.toString() + ".png");
-  var opts = new PNGSaveOptions();
-  opts.quality = lodSldr.value;
-  alert(lodSldr.value);
-  doc.saveAs(file, opts, true);
-}
-
-dlg.show();
+// doc.resizeImage(doc.width * 8, doc.height * 8);
