@@ -288,6 +288,15 @@ waitForRedraw = function() {
   return executeAction(s2t('wait'), d, DialogModes.NO);
 };
 
+// FUNCTIONS
+
+metalglossBtn.onClick = function() {
+    app.activeDocument.activeLayer.invert();
+}
+
+
+
+// FINAL
 g_dlg.show();
 
 while (isDone === false) {
