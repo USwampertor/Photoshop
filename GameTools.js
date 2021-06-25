@@ -8,13 +8,6 @@
 // ES6
 // require('./LODSettings.js')
 
-function LODSettings()
-{
-  this.docWidth   = 0;
-  this.docHeight  = 0;
-  this.squaredMax = 0;
-}
-
 function LODSettings(w,h,s)
 {
   this.docWidth   = w;
@@ -43,7 +36,7 @@ Image.prototype.onDraw = function()
   WH = wh = xy = null;
 }
 
-var g_doc = null;
+var g_doc;
 
 var g_LOD = new LODSettings(0,0,0);
 
@@ -72,7 +65,7 @@ function main()
       g_dlg.spacing = 10; 
       g_dlg.margins = 16; 
 
-      var imageFile = new File(File.encode('D:/Users/toa_l/Documents/Universidad/Photoshop/ahit6.png'));
+      var imageFile = new File(File.encode('D:/Users/toa_l/Documents/Universidad/Photoshop/icon.png'));
       var lodImg = g_dlg.add("image", undefined, imageFile, {name: "lodImg"}); 
           lodImg.size=[150,150];
 
@@ -125,7 +118,7 @@ function main()
 
   g_lodTxt = lodPnl.add("statictext", undefined, undefined, {name: "lodTxt"}); 
   g_lodTxt.alignment = ["center","top"]; 
-  g_lodTxt.text = g_LOD.squaredMax.toString();
+  g_lodTxt.text = (g_LOD.squaredMax + 1).toString();
 
   var prvTitle = lodPnl.add("statictext", undefined, undefined, {name: "prvTitle"}); 
       prvTitle.alignment = ["center","top"]; 
@@ -290,6 +283,17 @@ function main()
 
   while (isDone === false) {
     app.refresh(); // or, alternatively, waitForRedraw();
+    if (documents.length > 0)
+    {
+      if (g_doc != app.activeDocument)
+      {
+        g_doc = app.activeDocument;
+        g_LOD = setLODValues();
+        g_lodSldr.maxvalue = g_LOD.squaredMax + 1;
+        g_lodSldr.value = g_LOD.squaredMax + 1;
+        g_lodTxt.text = g_LOD.squaredMax.toString();
+      }
+    }
   }
 }
 
