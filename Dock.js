@@ -1,70 +1,127 @@
-{
-	function myScript(thisObj){
-		function myScript_buildUI(thisObj){
-			var myPanel = (thisObj instanceof Panel) ? thisObj : new Window("palette", "AK_toolkit_V01", undefined, {resizeable:true});
+(function(thisObj) {
 
-			res = "group{orientation:'row',\
-				myTabbedPanel: Panel{type:'tabbedpanel', text:'',\
-					myTab1: Panel{type:'tab', text:'tab1',\
-						myTabContent1: Button{text:'my tabbed button1'},\
-						myTabContent2: Button{text:'my tabbed button2'},\
-						myTabContent3: Button{text:'my tabbed button3'},\
-						myTabContent4: Button{text:'my tabbed button4'},\
-						myTabContent5: Button{text:'my tabbed button5'},\
-					},\
-					myTab2: Panel{type:'tab', text:'tab2',\
-					},\
-					myTab3: Panel{type:'tab', text:'tab3',\
-					},\
-				},\
-			}";
+	var scriptPalette = scriptBuildUI(thisObj);
 
-			myPanel.grp = myPanel.add(res);
+	if (scriptPalette !== null && scriptPalette instanceof Window) {
 
-			//Defaults
-			myPanel.grp.myTabbedPanel.myTab1.myTabContent1.onClick = function() {
-				alert("button 1 clicked");
-			}
-		
-			myPanel.grp.myTabbedPanel.myTab1.myTabContent2.onClick =  onTabClicked;
-			
-			myPanel.layout.layout(true);
+			scriptPalette.center();
 
-			return myPanel;
-		}
-	
-		function onTabClicked() {
-			alert(this.text + " button clicked");
-		}
-	
-		var myScriptPal = myScript_buildUI(thisObj);
+			scriptPalette.show();
 
-		if (myScriptPal != null && myScriptPal instanceof Window){
-			myScriptPal.center();
-			myScriptPal.show();
-		}
+	} else {
+
+			scriptPalette.layout.layout(true);
 
 	}
-	myScript(this);
-}
 
+	function scriptBuildUI(thisObj) {
 
+			//UI Creation   
 
-// TO KEEP THIS ALIVE
-// =====
+			var myWindow = (thisObj instanceof Panel) ? thisObj : new Window("palette", "Dock", undefined, {
 
-//sentinel variable
-var isDone, s2t, waitForRedraw;
+					resizeable: true
 
-isDone = false;
+			});
 
-s2t = function(stringID) {
-  return app.stringIDToTypeID(stringID);
-};
+			var myMessage = myWindow.add("statictext");
 
-waitForRedraw = function() {
-  var d;
-  d = new ActionDescriptor();
-  d.putEnumerated(s2t('state'), s2t('state'), s2t('redrawComplete'));
-  return executeAction(s2t('wait'), d, DialogModes.NO);
-};
+			myMessage.text = "תסריט להפיכת טקסט. נעשה על ידי איתי אסולין";
+
+			var buttons = myWindow.add("panel", undefined, "buttons");
+
+			buttons.orientation = "row";
+
+			var HebrewThis = buttons.add("button", undefined, "HebrewThis!");
+
+			var Cancel = buttons.add("button", undefined, "Cancel");
+
+			//Hebrew this button   
+
+			HebrewThis.onClick = function() {
+
+							app.beginUndoGroup("AddEffect");
+
+							var curItem = app.project.activeItem;
+
+							var selectedLayers = curItem.selectedLayers;
+
+							// check if comp is selected   
+
+							if (curItem == null || !(curItem instanceof CompItem)) {
+
+									// if no comp selected, display an alert   
+
+									alert("בבקשה בחר שכבה");
+
+							} else {
+
+									// define the layer in the loop we're currently looking at   
+
+									var myLayer = app.project.activeItem.layer(1);
+
+									var curVal = myLayer.property("Scale").value;
+
+									myLayer.property("Scale").setValue([-100, 100]);
+
+									var Text = selectedLayers[0].Text.Animators.addProperty("ADBE Text Animator");
+
+									myText.property("ADBE Text Selectors").addProperty("ADBE Text Selector");
+
+									myText.property("ADBE Text Animator Properties").addProperty("ADBE Text Scale 3D").setValue([-100, 100]);
+
+							}
+
+							// close the undo group   
+
+							app.endUndoGroup();
+
+					} //Hebrew this button ended.   
+
+			//cancel button   
+
+			Cancel.onClick = function() {
+
+					app.beginUndoGroup("AddEffect");
+
+					var curItem = app.project.activeItem;
+
+					var selectedLayers = curItem.selectedLayers;
+
+					// check if comp is selected   
+
+					if (curItem == null || !(curItem instanceof CompItem)) {
+
+							// if no comp selected, display an alert   
+
+							alert("בבקשה בחר שכבה");
+
+					} else {
+
+							// define the layer in the loop we're currently looking at   
+
+							var myLayer = app.project.activeItem.layer(1);
+
+							var curVal = myLayer.property("Scale").value;
+
+							myLayer.property("Scale").setValue([100, 100]);
+
+							var myAnim = selectedLayers[0].Text.Animators.property("ADBE Text Animator");
+
+							myAnim.property("ADBE Text Selectors").property("ADBE Text Selector");
+
+							myAnim.property("ADBE Text Animator Properties").property("ADBE Text Scale 3D").setValue([100, 100]);
+
+					}
+
+					// close the undo group   
+
+					app.endUndoGroup();
+
+			}
+
+			return myWindow;
+
+	} //UI Creation End.//   
+
+})(this);
