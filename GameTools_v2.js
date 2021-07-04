@@ -215,7 +215,7 @@ var saveBtn = savePnl.add("button", undefined, undefined, {name: "saveBtn"});
 
 var progressBar = savePnl.add("progressbar", undefined, undefined, {name: "progressBar"}); 
     progressBar.maxvalue = 100; 
-    progressBar.value = 50; 
+    progressBar.value = 0; 
     progressBar.preferredSize.width = 50; 
     progressBar.preferredSize.height = 4; 
     progressBar.alignment = ["fill","center"]; 
@@ -285,6 +285,54 @@ var extraTab = generalTab.add("tab", undefined, undefined, {name: "extraTab"});
     extraTab.spacing = 10; 
     extraTab.margins = 10; 
 
+// BATCHLOADPNL
+// ============
+var batchLoadPnl = extraTab.add("panel", 
+                                undefined, 
+                                undefined, 
+                                {name: "batchLoadPnl"}); 
+    batchLoadPnl.text = "Batch Load"; 
+    batchLoadPnl.orientation = "column"; 
+    batchLoadPnl.alignChildren = ["fill","center"]; 
+    batchLoadPnl.spacing = 10; 
+    batchLoadPnl.margins = 10; 
+    batchLoadPnl.alignment = ["fill","top"]; 
+
+var batchLoadTxt = batchLoadPnl.add("statictext", 
+                                    undefined, 
+                                    undefined, 
+                                    {name: "batchLoadTxt"}); 
+    batchLoadTxt.text = "Search all files in folder..."; 
+
+var batchLoadEdit = batchLoadPnl.add('edittext {properties: {name: "batchLoadEdit"}}'); 
+    batchLoadEdit.text = "Path..."; 
+
+var batchLoadBtn = batchLoadPnl.add("button", 
+                                    undefined, 
+                                    undefined, 
+                                    {name: "batchLoadBtn"}); 
+    batchLoadBtn.text = "Load All"; 
+
+// BATCHSAVEPNL
+// ============
+var batchSavePnl = extraTab.add("panel", 
+                                undefined, 
+                                undefined, 
+                                {name: "batchSavePnl"}); 
+    batchSavePnl.text = "Save Batch"; 
+    batchSavePnl.orientation = "column"; 
+    batchSavePnl.alignChildren = ["fill","center"]; 
+    batchSavePnl.spacing = 10; 
+    batchSavePnl.margins = 10; 
+    batchSavePnl.alignment = ["fill","top"]; 
+
+var batchSaveBtn = batchSavePnl.add("button", 
+                                    undefined, 
+                                    undefined, 
+                                    {name: "batchSaveBtn"}); 
+    batchSaveBtn.text = "Save All"; 
+
+
 // FUNCTIONS
 // =========
 
@@ -340,42 +388,49 @@ compresschk.onClick = function() {
   compressgrp.enabled = compresschk.value;
 }
 
+batchLoadBtn.onClick = function() {
+  progressBar.value = 0;
+  var searchFolder = new Folder(batchLoadEdit.text);
+  if (searchFolder.exists) 
+  {
+    var files = searchFolder.getFiles();
+    for(var i = 0; i < files.length; ++i)
+    {
+      // alert(files[i].absoluteURI);
+      app.open(files[i]);
+    }
+  }
+  else 
+  {
+    alert("Invalid path");
+  }
+}
+
+batchSaveBtn.onClick = function() {
+  
+}
+
 saveBtn.onClick = function()
 {
+  progressBar.value = 0;
   if (documents.length > 0)
   {
     var savedState = g_doc.activeHistoryState;
     var ogWidth = g_doc.width;
     var ogHeight = g_doc.height;
     var mergeOptionStr = "";
-    // Check if it should compress and how
-    if (compresschk.value)
-    {
-      var newWidth, newHeight;
-      newWidth = ogWidth;
-      newHeight = ogHeight;
-
-      if (lodSldr.value != g_LOD.squaredMax + 1)
-      {
-        newHeight = Math.pow(2, lodSldr.value);
-        newWidth  = Math.pow(2, lodSldr.value);
-      }
-
-      g_doc.resizeImage(newWidth, newHeight);
-
-    }
+    
     // Check if it should merge and how
     if (mergechk.value)
     {
       var selectedLayers;
       // Metal Pipeline
-      if (dropdown1.value.index < 7)
+      if (dropdown1.selection.index < 6)
       {
 
         var metal = null;
         var ambient = null;
         var roughness = null;
-
         for(var i = 0; i < g_doc.artLayers.length; ++i)
         {
           if (g_doc.artLayers[i].name.indexOf("~AO") != -1)
@@ -416,42 +471,42 @@ saveBtn.onClick = function()
         selectedLayers = [metal, roughness, ambient];
 
         // Check the merge order
-        if (0 == dropdown1.value.index) 
+        if (0 == dropdown1.selection.index) 
         {
           mergeOptionStr = "~RMA";
           selectedLayers[0] = roughness;
           selectedLayers[1] = metal;
           selectedLayers[2] = ambient;
         }
-        if (1 == dropdown1.value.index)
+        if (1 == dropdown1.selection.index)
         {
           mergeOptionStr = "~RAM";
           selectedLayers[0] = roughness;
           selectedLayers[1] = ambient;
           selectedLayers[2] = metal;
         }
-        if (2 == dropdown1.value.index)
+        if (2 == dropdown1.selection.index)
         {
           mergeOptionStr = "~MRA";
           selectedLayers[0] = metal;
           selectedLayers[1] = roughness;
           selectedLayers[2] = ambient;
         }
-        if (3 == dropdown1.value.index)
+        if (3 == dropdown1.selection.index)
         {
           mergeOptionStr = "~MAR";
           selectedLayers[0] = metal;
           selectedLayers[1] = ambient;
           selectedLayers[2] = roughness;
         }
-        if (4 == dropdown1.value.index)
+        if (4 == dropdown1.selection.index)
         {
           mergeOptionStr = "~AMR";
           selectedLayers[0] = ambient;
           selectedLayers[1] = metal;
           selectedLayers[2] = roughness;
         }
-        if (5 == dropdown1.value.index)
+        if (5 == dropdown1.selection.index)
         {
           mergeOptionStr = "~ARM";
           selectedLayers[0] = ambient;
@@ -495,11 +550,11 @@ saveBtn.onClick = function()
 
         selectedLayers = [glossiness, ambient];
 
-        if (7 == dropdown1.value.index)
+        if (7 == dropdown1.selection.index)
         {
           mergeOptionStr = "~GA";
         }
-        if (8 == dropdown1.value.index)
+        if (8 == dropdown1.selection.index)
         {
           mergeOptionStr = "~AG";
           selectedLayers = [ ambient, glossiness];
@@ -512,7 +567,7 @@ saveBtn.onClick = function()
         selectedLayers[i].visible = false;
       }
       
-      var newLayer = g_doc.artLayers[0];
+      var newLayer = g_doc.artLayers.add();
 
       fillColor = new SolidColor;
       fillColor.rgb.red = 0;
@@ -539,6 +594,204 @@ saveBtn.onClick = function()
       
     }
     
+    // Check if it should compress and how
+    if (compresschk.value)
+    {
+      if (singleOpt.value)
+      {
+        alert("b");
+        var newWidth, newHeight;
+        newWidth = ogWidth;
+        newHeight = ogHeight;
+  
+        if (lodSldr.value != g_LOD.squaredMax + 1)
+        {
+          newHeight = Math.pow(2, lodSldr.value);
+          newWidth  = Math.pow(2, lodSldr.value);
+        }
+  
+        g_doc.resizeImage(newWidth, newHeight);
+      }
+      else 
+      {
+        var newWidth, newHeight;
+        newWidth = ogWidth;
+        newHeight = ogHeight;
+
+        for(var i = lodSldr.value; i >= 0; --i)
+        {
+          progressBar.value = lodSldr.value > 0 ? 100 - (100 * i / lodSldr.value) : 100;
+          newHeight = Math.pow(2, i);
+          newWidth  = Math.pow(2, i);
+          g_doc.resizeImage(newWidth, newHeight);
+
+          // Check the saving format
+          var saveValue = dropdown2.selection.index;
+          var savePath = g_doc.path + '/' + g_doc.name +
+          "_" + i.toString() +
+          (mergechk.value ? (mergeOptionStr) : "");
+          // PNG
+          if (0 == saveValue)
+          {
+            var file = new File(savePath + ".png");
+            var opts = new PNGSaveOptions();
+            opts.quality = lodSldr.value;
+            g_doc.saveAs(file, opts, true);
+          }
+          // TARGA
+          if (1 == saveValue)
+          {
+            var file = new File(savePath + ".targa");
+            opts = new TargaSaveOptions();
+            opts.alphaChannels = true;
+            opts.resolution = TargaBitsPerPixels.THIRTYTWO;
+            g_doc.saveAs(file, opts, true);
+          }
+          // TIFF
+          if (2 == saveValue)
+          {
+            var file = new File(savePath + ".tiff");
+            opts = new TiffSaveOptions();
+            g_doc.saveAs(file, opts, true);
+          }
+          // JPG
+          if (3 == saveValue)
+          {
+            var file = new File(savePath + ".jpg");
+            opts = new JPEGSaveOptions();
+            g_doc.saveAs(file, opts, true);
+          }
+          // DDS
+          if (5 == saveValue)
+          {
+            var idsave = charIDToTypeID( "save" );
+            var desc14 = new ActionDescriptor();
+            var idAs = charIDToTypeID( "As  " );
+            var desc15 = new ActionDescriptor();
+            var idsFoI = charIDToTypeID( "sFoI" );
+            desc15.putInteger( idsFoI, 0 );
+            var idsASC = charIDToTypeID( "sASC" );
+            desc15.putInteger( idsASC, 0 );
+            var idsTxT = charIDToTypeID( "sTxT" );
+            var idenTT = charIDToTypeID( "enTT" );
+            var idtxtwoD = charIDToTypeID( "tx2D" );
+            desc15.putEnumerated( idsTxT, idenTT, idtxtwoD );
+            var idmipF = charIDToTypeID( "mipF" );
+            desc15.putBoolean( idmipF, true );
+            var idmpFT = charIDToTypeID( "mpFT" );
+            desc15.putInteger( idmpFT, 0 );
+            var idmOFW = charIDToTypeID( "mOFW" );
+            desc15.putBoolean( idmOFW, false );
+            var idmFOV = charIDToTypeID( "mFOV" );
+            desc15.putDouble( idmFOV, 2.000000 );
+            var idmpPA = charIDToTypeID( "mpPA" );
+            desc15.putBoolean( idmpPA, true );
+            var idiOOM = charIDToTypeID( "iOOM" );
+            var ideIOM = charIDToTypeID( "eIOM" );
+            var ideICo = charIDToTypeID( "eICo" );
+            desc15.putEnumerated( idiOOM, ideIOM, ideICo );
+            var idiOBS = charIDToTypeID( "iOBS" );
+            desc15.putBoolean( idiOBS, false );
+            var idiOBr = charIDToTypeID( "iOBr" );
+            desc15.putDouble( idiOBr, 0.000000 );
+            var idiOBg = charIDToTypeID( "iOBg" );
+            desc15.putDouble( idiOBg, 0.000000 );
+            var idiOBb = charIDToTypeID( "iOBb" );
+            desc15.putDouble( idiOBb, 0.000000 );
+            var idiOBa = charIDToTypeID( "iOBa" );
+            desc15.putDouble( idiOBa, 1.000000 );
+            var idiOCQ = charIDToTypeID( "iOCQ" );
+            desc15.putInteger( idiOCQ, 0 );
+            var idiOSr = charIDToTypeID( "iOSr" );
+            desc15.putDouble( idiOSr, 1.000000 );
+            var idiOSg = charIDToTypeID( "iOSg" );
+            desc15.putDouble( idiOSg, 1.000000 );
+            var idiOSb = charIDToTypeID( "iOSb" );
+            desc15.putDouble( idiOSb, 1.000000 );
+            var idiOSa = charIDToTypeID( "iOSa" );
+            desc15.putDouble( idiOSa, 1.000000 );
+            var idiBir = charIDToTypeID( "iBir" );
+            desc15.putDouble( idiBir, 0.000000 );
+            var idiBig = charIDToTypeID( "iBig" );
+            desc15.putDouble( idiBig, 0.000000 );
+            var idiBib = charIDToTypeID( "iBib" );
+            desc15.putDouble( idiBib, 0.000000 );
+            var idiBia = charIDToTypeID( "iBia" );
+            desc15.putDouble( idiBia, 0.000000 );
+            var idiOWr = charIDToTypeID( "iOWr" );
+            desc15.putBoolean( idiOWr, false );
+            var idiOAZ = charIDToTypeID( "iOAZ" );
+            desc15.putBoolean( idiOAZ, false );
+            var idiOBA = charIDToTypeID( "iOBA" );
+            desc15.putBoolean( idiOBA, false );
+            var idiOSu = charIDToTypeID( "iOSu" );
+            desc15.putBoolean( idiOSu, false );
+            var idiOBT = charIDToTypeID( "iOBT" );
+            desc15.putInteger( idiOBT, 127 );
+            var idiOBD = charIDToTypeID( "iOBD" );
+            desc15.putBoolean( idiOBD, false );
+            var idiOPA = charIDToTypeID( "iOPA" );
+            desc15.putBoolean( idiOPA, false );
+            var idiOonezero = charIDToTypeID( "iO10" );
+            desc15.putBoolean( idiOonezero, false );
+            var idiZsd = charIDToTypeID( "iZsd" );
+            desc15.putBoolean( idiZsd, true );
+            var idiZlv = charIDToTypeID( "iZlv" );
+            desc15.putInteger( idiZlv, 5 );
+            var idnFTy = charIDToTypeID( "nFTy" );
+            desc15.putInteger( idnFTy, 5 );
+            var idnWrp = charIDToTypeID( "nWrp" );
+            desc15.putBoolean( idnWrp, true );
+            var idnIvX = charIDToTypeID( "nIvX" );
+            desc15.putBoolean( idnIvX, false );
+            var idnIvY = charIDToTypeID( "nIvY" );
+            desc15.putBoolean( idnIvY, false );
+            var idnMnZ = charIDToTypeID( "nMnZ" );
+            desc15.putDouble( idnMnZ, 0.000000 );
+            var idnNSc = charIDToTypeID( "nNSc" );
+            desc15.putDouble( idnNSc, 1.000000 );
+            var idnCSr = charIDToTypeID( "nCSr" );
+            desc15.putInteger( idnCSr, 1 );
+            var idnAFi = charIDToTypeID( "nAFi" );
+            desc15.putInteger( idnAFi, 0 );
+            var idnNNl = charIDToTypeID( "nNNl" );
+            desc15.putBoolean( idnNNl, true );
+            var idnNCF = charIDToTypeID( "nNCF" );
+            var idenCD = charIDToTypeID( "enCD" );
+            var idecnZ = charIDToTypeID( "ecnZ" );
+            desc15.putEnumerated( idnNCF, idenCD, idecnZ );
+            var idnNCU = charIDToTypeID( "nNCU" );
+            var idenCD = charIDToTypeID( "enCD" );
+            var idecpY = charIDToTypeID( "ecpY" );
+            desc15.putEnumerated( idnNCU, idenCD, idecpY );
+            var idnNCR = charIDToTypeID( "nNCR" );
+            var idenCD = charIDToTypeID( "enCD" );
+            var idecpX = charIDToTypeID( "ecpX" );
+            desc15.putEnumerated( idnNCR, idenCD, idecpX );
+            var idiOFV = charIDToTypeID( "iOFV" );
+            desc15.putBoolean( idiOFV, false );
+            var idfxSt = charIDToTypeID( "fxSt" );
+            desc15.putString( idfxSt, """0 """ );
+            var idsirV = charIDToTypeID( "sirV" );
+            desc15.putInteger( idsirV, 1 );
+            var idNVIDIADDSNVIDIATextureToolsExporter = stringIDToTypeID( "NVIDIA DDS - NVIDIA Texture Tools Exporter" );
+            desc14.putObject( idAs, idNVIDIADDSNVIDIATextureToolsExporter, desc15 );
+            var idIn = charIDToTypeID( "In  " );
+            desc14.putPath( idIn, new File( savePath + ".dds" ) );
+            var idDocI = charIDToTypeID( "DocI" );
+            desc14.putInteger( idDocI, 219 );
+            var idCpy = charIDToTypeID( "Cpy " );
+            desc14.putBoolean( idCpy, true );
+            var idsaveStage = stringIDToTypeID( "saveStage" );
+            var idsaveStageType = stringIDToTypeID( "saveStageType" );
+            var idsaveSucceeded = stringIDToTypeID( "saveSucceeded" );
+            desc14.putEnumerated( idsaveStage, idsaveStageType, idsaveSucceeded );
+            executeAction( idsave, desc14, DialogModes.NO );
+          }
+        }
+        return;
+      }
+    }
     // Check the saving format
     var saveValue = dropdown2.selection.index;
     var savePath = g_doc.path + '/' + g_doc.name +
@@ -702,6 +955,7 @@ saveBtn.onClick = function()
       desc14.putEnumerated( idsaveStage, idsaveStageType, idsaveSucceeded );
       executeAction( idsave, desc14, DialogModes.NO );
     }
+
 
     // Return to previous history state before the shitshow
     g_doc.activeHistoryState = savedState;
