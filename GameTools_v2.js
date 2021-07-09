@@ -44,7 +44,7 @@ var titleGrp = g_dlg.add("group", undefined, {name: "titleGrp"});
     titleGrp.margins = 0; 
     titleGrp.alignment = ["fill","center"]; 
 
-var toolImgFile = new File(File.encode('C:/Users/toa_l/Documents/Work/Photoshop/icon.png'));
+var toolImgFile = new File(File.encode('D:/Users/toa_l/Documents/Universidad/Photoshop/icon.png'));
 var toolImg = titleGrp.add("image", undefined, toolImgFile, {name: "toolImg"}); 
     toolImg.size = [100,100];
 
