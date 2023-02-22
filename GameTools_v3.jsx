@@ -153,7 +153,7 @@ var mergePnl = compressTab.add("panel", undefined, undefined, {name: "mergePnl"}
     mergePnl.margins = 10; 
     mergePnl.alignment = ["fill","top"]; 
 
-var dropdown1_array = ["PBRM - Rough + Metal + AO","PBRM - Rough + AO + Metal","PBRM - Metal + Rough + AO","PBRM - Metal + AO + Rough","PBRM - AO + Metal + Rough","PBRM - AO + Rough + Metal","","-","PBRS - Gloss + AO","PBRS - AO + Gloss"]; 
+var dropdown1_array = ["PBRM - Rough + Metal + AO","PBRM - Rough + AO + Metal","PBRM - Metal + Rough + AO","PBRM - Metal + AO + Rough","PBRM - AO + Metal + Rough","PBRM - AO + Rough + Metal","Unity Mask Map - Metal + AO + Detail + Smoothness","","-","PBRS - Gloss + AO","PBRS - AO + Gloss"]; 
 var dropdown1 = mergePnl.add("dropdownlist", undefined, undefined, {name: "dropdown1", items: dropdown1_array}); 
     dropdown1.selection = 0; 
     dropdown1.alignment = ["fill","center"]; 
@@ -306,9 +306,6 @@ var batchLoadTxt = batchLoadPnl.add("statictext",
                                     {name: "batchLoadTxt"}); 
     batchLoadTxt.text = "Search all files in folder..."; 
 
-// var batchLoadEdit = batchLoadPnl.add('edittext {properties: {name: "batchLoadEdit"}}'); 
-//     batchLoadEdit.text = "Path..."; 
-
 var batchLoadBtn = batchLoadPnl.add("button", 
                                     undefined, 
                                     undefined, 
@@ -337,7 +334,6 @@ var batchSaveBtn = batchSavePnl.add("button",
 
 // FUNCTIONS
 // =========
-
 function setLODValues()
 {
   if (documents.length > 0)
@@ -395,26 +391,36 @@ scriptBtn.onClick = function() {
   }
 }
 
+roughglossBtn.onClick = function() {
+  var toInvert = null;
+  var toGloss = false;
+  for(var i = 0; i < g_doc.artLayers.length; ++i) {
+    if (g_doc.artLayers[i].name.indexOf("~GL") != -1) {
+      toInvert = g_doc.artLayers[i];
+    }
+    else if (g_doc.artLayers[i].name.indexOf("~RO") != -1) {
+      toInvert = g_doc.artLayers[i];
+      toGloss = true;
+    }
+    if (toInvert != null) {
+      break;
+    }
+  }
+
+  if (toInvert == null) {
+    alert("There is no layer with suffix" + (toGloss ? "~RO" : "~GL") + " in the project");
+    return;
+  }
+  toInvert.name = "Converted to " + (toGloss ? "~GL" : "~RO");
+  toInvert.invert();
+
+}
+
 compresschk.onClick = function() {
   compressgrp.enabled = compresschk.value;
 }
 
 batchLoadBtn.onClick = function() {
-  // progressBar.value = 0;
-  // var searchFolder = new Folder(batchLoadEdit.text);
-  // if (searchFolder.exists) 
-  // {
-  //   var files = searchFolder.getFiles();
-  //   for(var i = 0; i < files.length; ++i)
-  //   {
-  //     // alert(files[i].absoluteURI);
-  //     app.open(files[i]);
-  //   }
-  // }
-  // else 
-  // {
-  //   alert("Invalid path");
-  // }
   var inputFolder = Folder.selectDialog("Select Folder to open");
   if (inputFolder != null) {
     var fileList = inputFolder.getFiles();
@@ -535,6 +541,60 @@ saveBtn.onClick = function()
         }
 
       }
+      else if (dropdown1.selection.index == 6) {
+        var metal = null;
+        var ambient = null;
+        var detail = null;
+        var smoothness = null;
+        for(var i = 0; i < g_doc.artLayers.length; ++i)
+        {
+          if (g_doc.artLayers[i].name.indexOf("~ME") != -1)
+          {
+            metal = g_doc.artLayers[i];
+          }
+          else if (g_doc.artLayers[i].name.indexOf("~AO") != -1)
+          {
+            ambient = g_doc.artLayers[i];
+          }
+          else if (g_doc.artLayers[i].name.indexOf("~DE") != -1)
+          {
+            detail = g_doc.artLayers[i];
+          }
+          else if (g_doc.artLayers[i].name.indexOf("~GL") != -1)
+          {
+            smoothness = g_doc.artLayers[i];
+          }
+
+          if ( metal != null && ambient != null && detail != null && smoothness != null)
+          {
+            break;
+          }
+        }
+
+        if (metal == null)
+        {
+          alert("There is no Metalness Layer with suffix ~ME");
+          return;
+        }
+        if (ambient == null)
+        {
+          alert("There is no Ambient Occlusion Layer with suffix ~AO");
+          return;
+        }
+        if (detail == null)
+        {
+          alert("There is no Detail Layer with suffix ~DE");
+          return;
+        }
+        if (smoothness == null)
+        {
+          alert("There is no Smoothness Layer with suffix ~GL");
+          return;
+        }
+
+        selectedLayers = [metal, ambient, detail, smoothness];
+
+      }
       else
       {
         var ambient = null;
@@ -596,8 +656,20 @@ saveBtn.onClick = function()
       g_doc.selection.fill(fillColor);
       newLayer.visible = false;
 
-      var iMax = selectedLayers.length < 3 ? selectedLayers.length : 3;
-
+      var iMax = selectedLayers.length < 4 ? selectedLayers.length : 4;
+      //This is the case for a 4th layer
+      if (iMax == 4)
+      {
+        //We have to check if there is already an alpha channel for this one
+          alert("There are 4 layers");
+          if (g_doc.channels.length < 4)
+        {
+          alert("There are 4 layers to merge and just 3 channels. Creating new one...");
+          g_doc.channels.add();
+          g_doc.channels[3].name = "Alpha";
+        }
+      }
+      alert("a");
       for (var i = 0; i < iMax; i++)
       {
         g_doc.activeLayer = selectedLayers[i];
@@ -609,6 +681,7 @@ saveBtn.onClick = function()
         g_doc.paste();
         selectedLayers[i].visible = false;
       }
+      alert("b");
 
       g_doc.selection.deselect();
       
@@ -619,7 +692,6 @@ saveBtn.onClick = function()
     {
       if (singleOpt.value)
       {
-        alert("b");
         var newWidth, newHeight;
         newWidth = ogWidth;
         newHeight = ogHeight;
